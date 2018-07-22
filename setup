@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# modeled after https://github.com/jasonrudolph/keyboard#installation
+
+set -e
+
+which -s brew || (echo "Homebrew is required: http://brew.sh/" && exit 1)
+
+brew bundle check || brew bundle
+
+# Prepare custom settings for Hammerspoon
+mkdir -p ~/.hammerspoon
+if ! grep -sq "require('timeflow')" ~/.hammerspoon/init.lua; then
+  echo "require('timeflow')" >> ~/.hammerspoon/init.lua
+fi
+ln -sfn $PWD ~/.hammerspoon/timeflow
+
+# If Hammerspoon is already running, kill it so we can pick up the new config
+# when opening Hammerspoon below
+killall Hammerspoon || true
+
+# Open Hammerspoon
+open /Applications/Hammerspoon.app
+
+echo "Done!"
+
