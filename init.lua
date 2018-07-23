@@ -2,8 +2,8 @@ local things = require("timeflow.things3")
 
 -- Menubar utils --
 
-local indicator_a = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"}
-local indicator_b = {" ", "⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
+local indicator_a = {"  ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"}
+local indicator_b = {"⠀", "⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
 
 local menuApp = hs.menubar.new()
 local flashIndicator = true
