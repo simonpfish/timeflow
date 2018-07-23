@@ -1,4 +1,4 @@
-local sqlite3 = require("lsqlite3complete")
+local things = require("timeflow.things3")
 
 -- Menubar utils --
 
@@ -11,33 +11,6 @@ local function updateMenuTimer(time, task)
     else
         menuApp:setTitle(str)
     end
-end
-
---- Things3 utils ---
-
-local function getNextTask()
-    local thingsPath =
-        "~/Library/Containers/com.culturedcode.ThingsMac/Data/Library/Application Support/Cultured Code/Things/Things.sqlite3"
-
-    local db = sqlite3.open(hs.fs.pathToAbsolute(thingsPath))
-
-    local sm =
-        db:prepare(
-        [[
-            SELECT `title` FROM `TMTask` WHERE `uuid` IN (
-            SELECT `tasks` FROM `TMTaskTag` WHERE `tags` LIKE '%CD67BB58-A8C4-4EB2-8FD8-29A6E0C6437A%'
-            ) AND `status` LIKE 0 AND `trashed` LIKE 0 ORDER BY `todayIndex`
-        ]]
-    )
-
-    sm:step()
-
-    local task = sm:get_value(0)
-
-    sm:finalize()
-    db:close()
-
-    return task
 end
 
 -- Core timer functionality --
@@ -59,7 +32,7 @@ function wave:reset()
 end
 
 function wave:start(duration)
-    self.task = getNextTask()
+    self.task = things.getNextTask()
     self.startTime = hs.timer.localTime()
     self.endTime = self.startTime + duration
 
@@ -67,7 +40,7 @@ function wave:start(duration)
         hs.timer.doUntil(
         function()
             if hs.timer.localTime() >= self.endTime then
-                self.reset()
+                self:finish()
                 return true
             else
                 return false
@@ -79,6 +52,11 @@ function wave:start(duration)
         end,
         1
     )
+end
+
+function wave:finish()
+    hs.alert("Done 🌊")
+    self:reset()
 end
 
 wave:reset()
