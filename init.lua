@@ -3,14 +3,14 @@ local things = require("timeflow.things3")
 -- Menubar utils --
 
 local indicator_a = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"}
-local indicator_b = {"⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
+local indicator_b = {" ", "⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
 
 local menuApp = hs.menubar.new()
 local flashIndicator = true
 
 local function updateMenuTimer(time, task)
     local fullBins = math.floor(time / (60 * 10))
-    local lastBinProgress = math.floor((time % (60 * 10)) / (60 * 10) * 8) + 1
+    local lastBinProgress = math.floor((time % (60 * 10)) / (60 * 10) * 8) + 2
 
     if flashIndicator then
         lastBinProgress = lastBinProgress - 1
@@ -21,7 +21,7 @@ local function updateMenuTimer(time, task)
 
     local progress = string.rep(indicator_b[8], fullBins) .. indicator_b[lastBinProgress]
 
-    menuApp:setTitle(progress .. "  " .. task)
+    menuApp:setTitle(progress .. "   " .. task)
 end
 
 -- Core timer functionality --
