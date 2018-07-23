@@ -131,7 +131,7 @@ end
 
 wave:reset()
 
---- Hotkeys ---
+--- Interaction ---
 
 local progressAlert
 hs.hotkey.bind(
@@ -148,6 +148,16 @@ hs.hotkey.bind(
             progressAlert = nil
         else
             wave:start(wave.defaultDuration)
+        end
+    end
+)
+
+menuApp:setClickCallback(
+    function()
+        if wave.isRunning then
+            wave:reset()
+        else
+            wave:start()
         end
     end
 )
