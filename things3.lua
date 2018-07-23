@@ -8,7 +8,10 @@ local function getNextTask()
         db:prepare(
         [[
             SELECT `title` FROM `TMTask` WHERE `uuid` IN (
-            SELECT `tasks` FROM `TMTaskTag` WHERE `tags` LIKE '%CD67BB58-A8C4-4EB2-8FD8-29A6E0C6437A%'
+                SELECT `tasks` FROM `TMTaskTag` WHERE `tags` LIKE (
+				    SELECT `uuid` FROM `TMTag`
+				    WHERE `title` LIKE '👨🏻‍💻'
+			    )
             ) AND `status` LIKE 0 AND `trashed` LIKE 0 ORDER BY `todayIndex`
         ]]
     )
