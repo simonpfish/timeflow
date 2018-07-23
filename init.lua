@@ -63,6 +63,8 @@ function wave:start()
                 timeChooser:cancel()
                 listener:stop()
                 return true
+            elseif event:getKeyCode() == hs.keycodes.map["escape"] then
+                listener:stop()
             end
         end
     ):start()
