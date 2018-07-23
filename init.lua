@@ -34,6 +34,8 @@ local wave = {
 function wave:reset()
     self.startTime = 0
     self.endTime = 0
+    self.duration = 0
+    self.notifiedHalf = false
     self.task = nil
     if self.timer then
         self.timer:stop()
@@ -70,6 +72,7 @@ function wave:start()
 end
 
 function wave:triggerTimer(duration)
+    self.duration = duration
     self.startTime = hs.timer.localTime()
     self.endTime = self.startTime + duration
     self.timer =
@@ -84,6 +87,10 @@ function wave:triggerTimer(duration)
         end,
         function()
             local remaining = self.endTime - hs.timer.localTime()
+            if (remaining / self.duration) <= 0.5 and not self.notifiedHalf then
+                hs.alert.show("Halfway there 🌊")
+                self.notifiedHalf = true
+            end
             updateMenuTimer(remaining, self.task)
         end,
         1
