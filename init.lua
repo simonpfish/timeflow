@@ -2,15 +2,49 @@ local things = require("timeflow.things3")
 
 -- Menubar utils --
 
+local indicator_a = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"}
+local indicator_b = {"⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
+local spinner = {
+    "☀️ ",
+    "🌤 ",
+    "⛅️ ",
+    "🌥 ",
+    "☁️ ",
+    "🌧 ",
+    "🌨 ",
+    "🌧 ",
+    "🌨 ",
+    "🌧 ",
+    "🌨 ",
+    "⛈ ",
+    "🌨 ",
+    "🌧 ",
+    "🌨 ",
+    "☁️ ",
+    "🌥 ",
+    "⛅️ ",
+    "🌤 "
+}
+local spinnerIndex = 1
 local menuApp = hs.menubar.new()
+local flashIndicator = true
 
 local function updateMenuTimer(time, task)
-    local str = string.format("%02d:%02d", math.floor(time / 60), time % 60)
-    if task then
-        menuApp:setTitle(task .. " 🌊 " .. str)
+    local fullBins = math.floor(time / (60 * 10))
+    local lastBinProgress = math.floor((time % (60 * 10)) / (60 * 10) * 8) + 1
+
+    if flashIndicator then
+        lastBinProgress = lastBinProgress - 1
+        flashIndicator = false
     else
-        menuApp:setTitle(str)
+        flashIndicator = true
     end
+
+    local progress = string.rep(indicator_b[8], fullBins) .. indicator_b[lastBinProgress]
+
+    menuApp:setTitle(spinner[spinnerIndex] .. progress .. " " .. task)
+
+    spinnerIndex = spinnerIndex % 10 + 1
 end
 
 -- Core timer functionality --
@@ -49,6 +83,7 @@ function wave:start()
                 self:triggerTimer(tonumber(timeChooser:query()) * 60)
                 timeChooser:cancel()
                 listener:stop()
+                return true
             end
         end
     ):start()
