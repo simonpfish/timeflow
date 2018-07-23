@@ -17,7 +17,7 @@ end
 
 local wave = {
     -- configurable variables:
-    defaultDuration = 15 * 60
+    defaultDuration = 10
 }
 
 function wave:reset()
@@ -31,11 +31,14 @@ function wave:reset()
     menuApp:setTitle("🌊")
 end
 
-function wave:start(duration)
+function wave:start()
     self.task = things.getNextTask()
+    self:triggerTimer(self.defaultDuration)
+end
+
+function wave:triggerTimer(duration)
     self.startTime = hs.timer.localTime()
     self.endTime = self.startTime + duration
-
     self.timer =
         hs.timer.doUntil(
         function()

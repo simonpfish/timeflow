@@ -8,9 +8,6 @@ which -s brew || (echo "Homebrew is required: http://brew.sh/" && exit 1)
 
 brew bundle check || brew bundle
 
-# sqlite3 
-luarocks install lsqlite3complete
-
 # Prepare custom settings for Hammerspoon
 mkdir -p ~/.hammerspoon
 if ! grep -sq "require('timeflow')" ~/.hammerspoon/init.lua; then

@@ -1,10 +1,8 @@
-local sqlite3 = require("lsqlite3complete")
-
 local function getNextTask()
     local thingsPath =
         "~/Library/Containers/com.culturedcode.ThingsMac/Data/Library/Application Support/Cultured Code/Things/Things.sqlite3"
 
-    local db = sqlite3.open(hs.fs.pathToAbsolute(thingsPath))
+    local db = hs.sqlite3.open(hs.fs.pathToAbsolute(thingsPath))
 
     local sm =
         db:prepare(
