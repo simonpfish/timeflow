@@ -82,6 +82,9 @@ function wave:triggerTimer(duration)
     self.duration = duration
     self.startTime = hs.timer.localTime()
     self.endTime = self.startTime + duration
+    if self.timer then
+        self.timer:stop()
+    end
     self.timer =
         hs.timer.doUntil(
         function()
@@ -94,18 +97,28 @@ function wave:triggerTimer(duration)
         end,
         function()
             local remaining = self.endTime - hs.timer.localTime()
-            if (remaining / self.duration) <= 0.5 and not self.notifiedHalf then
-                hs.alert.show("Halfway there 🌊")
-                self.notifiedHalf = true
-            end
+            wave:notifyProgress(remaining)
             updateMenuTimer(remaining, self.task)
         end,
         1
     )
 end
 
+function wave:notifyProgress(remaining)
+    if (remaining / self.duration) <= 0.5 and not self.notifiedHalf then
+        hs.alert.show("Halfway there 🌊")
+        self.notifiedHalf = true
+    end
+end
+
 function wave:finish()
     hs.alert("Done 🌊")
+    hs.task.new(
+        "/usr/local/bin/fortune",
+        function(exitCode, stdOut, stdErr)
+            hs.alert.show(stdOut, 10)
+        end
+    ):start()
     self:reset()
 end
 
