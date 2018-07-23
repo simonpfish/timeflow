@@ -33,7 +33,28 @@ end
 
 function wave:start()
     self.task = things.getNextTask()
-    self:triggerTimer(self.defaultDuration)
+
+    local timeChooser =
+        hs.chooser.new(
+        function(choice)
+        end
+    )
+
+    local listener
+    listener =
+        hs.eventtap.new(
+        {hs.eventtap.event.types.keyDown},
+        function(event)
+            if event:getKeyCode() == hs.keycodes.map["return"] then
+                self:triggerTimer(tonumber(timeChooser:query()) * 60)
+                timeChooser:cancel()
+                listener:stop()
+            end
+        end
+    ):start()
+
+    timeChooser:rows(0)
+    timeChooser:show()
 end
 
 function wave:triggerTimer(duration)
