@@ -8,19 +8,24 @@ local indicator_b = {"⠀", "⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "�
 local menuApp = hs.menubar.new()
 local flashIndicator = true
 
-local function updateMenuTimer(time, task)
+local function getProgressIndicator(time, shouldFlash)
     local fullBins = math.floor(time / (60 * 10))
     local lastBinProgress = math.floor((time % (60 * 10)) / (60 * 10) * 8) + 2
 
-    if flashIndicator then
-        lastBinProgress = lastBinProgress - 1
-        flashIndicator = false
-    else
-        flashIndicator = true
+    if shouldFlash then
+        if flashIndicator then
+            lastBinProgress = lastBinProgress - 1
+            flashIndicator = false
+        else
+            flashIndicator = true
+        end
     end
 
-    local progress = string.rep(indicator_b[9], fullBins) .. indicator_b[lastBinProgress]
+    return string.rep(indicator_b[9], fullBins) .. indicator_b[lastBinProgress]
+end
 
+local function updateMenuTimer(time, task)
+    local progress = getProgressIndicator(time, true)
     menuApp:setTitle(progress .. "   " .. task)
 end
 
@@ -32,6 +37,7 @@ local wave = {
 }
 
 function wave:reset()
+    self.isRunning = false
     self.startTime = 0
     self.endTime = 0
     self.duration = 0
@@ -76,12 +82,13 @@ function wave:start()
 
     timeChooser:rows(0)
     timeChooser:show()
+    self.isRunning = true
 end
 
 function wave:triggerTimer(duration)
     self.duration = duration
-    self.startTime = hs.timer.localTime()
-    self.endTime = self.startTime + duration
+    self.remaining = duration
+    self.endTime = hs.timer.localTime() + duration
     if self.timer then
         self.timer:stop()
     end
@@ -96,16 +103,16 @@ function wave:triggerTimer(duration)
             end
         end,
         function()
-            local remaining = self.endTime - hs.timer.localTime()
-            wave:notifyProgress(remaining)
-            updateMenuTimer(remaining, self.task)
+            self.remaining = self.endTime - hs.timer.localTime()
+            wave:notifyProgress()
+            updateMenuTimer(self.remaining, self.task)
         end,
         1
     )
 end
 
-function wave:notifyProgress(remaining)
-    if (remaining / self.duration) <= 0.5 and not self.notifiedHalf then
+function wave:notifyProgress()
+    if (self.remaining / self.duration) <= 0.5 and not self.notifiedHalf then
         hs.alert.show("Halfway there 🌊")
         self.notifiedHalf = true
     end
@@ -126,10 +133,21 @@ wave:reset()
 
 --- Hotkeys ---
 
+local progressAlert
 hs.hotkey.bind(
     {"ctrl"},
     "return",
     function()
-        wave:start(wave.defaultDuration)
+        if wave.isRunning and not progressAlert then
+            progressAlert = hs.alert.show(getProgressIndicator(wave.remaining) .. "   " .. wave.task, 30)
+        end
+    end,
+    function()
+        if progressAlert then
+            hs.alert.closeSpecific(progressAlert)
+            progressAlert = nil
+        else
+            wave:start(wave.defaultDuration)
+        end
     end
 )
