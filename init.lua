@@ -19,7 +19,7 @@ local function updateMenuTimer(time, task)
         flashIndicator = true
     end
 
-    local progress = string.rep(indicator_b[8], fullBins) .. indicator_b[lastBinProgress]
+    local progress = string.rep(indicator_b[9], fullBins) .. indicator_b[lastBinProgress]
 
     menuApp:setTitle(progress .. "   " .. task)
 end
@@ -28,7 +28,7 @@ end
 
 local wave = {
     -- configurable variables:
-    defaultDuration = 10
+    defaultDuration = 25 * 60
 }
 
 function wave:reset()
@@ -59,7 +59,12 @@ function wave:start()
         {hs.eventtap.event.types.keyDown},
         function(event)
             if event:getKeyCode() == hs.keycodes.map["return"] then
-                self:triggerTimer(tonumber(timeChooser:query()) * 60)
+                local query = timeChooser:query()
+                if query == "" then
+                    self:triggerTimer(self.defaultDuration)
+                else
+                    self:triggerTimer(tonumber(timeChooser:query()) * 60)
+                end
                 timeChooser:cancel()
                 listener:stop()
                 return true
