@@ -4,28 +4,7 @@ local things = require("timeflow.things3")
 
 local indicator_a = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"}
 local indicator_b = {"⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
-local spinner = {
-    "☀️ ",
-    "🌤 ",
-    "⛅️ ",
-    "🌥 ",
-    "☁️ ",
-    "🌧 ",
-    "🌨 ",
-    "🌧 ",
-    "🌨 ",
-    "🌧 ",
-    "🌨 ",
-    "⛈ ",
-    "🌨 ",
-    "🌧 ",
-    "🌨 ",
-    "☁️ ",
-    "🌥 ",
-    "⛅️ ",
-    "🌤 "
-}
-local spinnerIndex = 1
+
 local menuApp = hs.menubar.new()
 local flashIndicator = true
 
@@ -42,9 +21,7 @@ local function updateMenuTimer(time, task)
 
     local progress = string.rep(indicator_b[8], fullBins) .. indicator_b[lastBinProgress]
 
-    menuApp:setTitle(spinner[spinnerIndex] .. progress .. " " .. task)
-
-    spinnerIndex = spinnerIndex % 10 + 1
+    menuApp:setTitle(progress .. "  " .. task)
 end
 
 -- Core timer functionality --
