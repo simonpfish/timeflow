@@ -1,33 +1,7 @@
 local things = require("timeflow.things3")
-
--- Menubar utils --
-
-local indicator_a = {"  ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"}
-local indicator_b = {"⠀", "⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
+local status = require("timeflow.status")
 
 local menuApp = hs.menubar.new()
-local flashIndicator = true
-
-local function getProgressIndicator(time, shouldFlash)
-    local fullBins = math.floor(time / (60 * 10))
-    local lastBinProgress = math.floor((time % (60 * 10)) / (60 * 10) * 8) + 2
-
-    if shouldFlash then
-        if flashIndicator then
-            lastBinProgress = lastBinProgress - 1
-            flashIndicator = false
-        else
-            flashIndicator = true
-        end
-    end
-
-    return string.rep(indicator_b[9], fullBins) .. indicator_b[lastBinProgress]
-end
-
-local function updateMenuTimer(time, task)
-    local progress = getProgressIndicator(time, true)
-    menuApp:setTitle(progress .. "   " .. task)
-end
 
 -- Core timer functionality --
 
@@ -52,40 +26,12 @@ end
 
 function wave:start()
     self.task = things.getNextTask()
-
-    local timeChooser =
-        hs.chooser.new(
-        function(choice)
-        end
-    )
-
-    local listener
-    listener =
-        hs.eventtap.new(
-        {hs.eventtap.event.types.keyDown},
-        function(event)
-            if event:getKeyCode() == hs.keycodes.map["return"] then
-                local query = timeChooser:query()
-                if query == "" then
-                    self:triggerTimer(self.defaultDuration)
-                else
-                    self:triggerTimer(tonumber(timeChooser:query()) * 60)
-                end
-                timeChooser:cancel()
-                listener:stop()
-                return true
-            elseif event:getKeyCode() == hs.keycodes.map["escape"] then
-                listener:stop()
-            end
-        end
-    ):start()
-
-    timeChooser:rows(0)
-    timeChooser:show()
-    self.isRunning = true
+    status:show(self)
+    status:chooseDuration(self)
 end
 
 function wave:triggerTimer(duration)
+    self.isRunning = true
     self.duration = duration
     self.remaining = duration
     self.endTime = hs.timer.localTime() + duration
@@ -105,7 +51,7 @@ function wave:triggerTimer(duration)
         function()
             self.remaining = self.endTime - hs.timer.localTime()
             wave:notifyProgress()
-            updateMenuTimer(self.remaining, self.task)
+            wave:updateOnMenu()
         end,
         1
     )
@@ -129,23 +75,46 @@ function wave:finish()
     self:reset()
 end
 
+local indicator_a = {"  ", "▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"}
+local indicator_b = {"⠀", "⡀", "⣀", "⣄", "⣤", "⣦", "⣶", "⣷", "⣿"}
+local flashIndicator = true
+
+function wave:getProgressIndicator(shouldFlash)
+    local fullBins = math.floor(self.remaining / (60 * 10))
+    local lastBinProgress = math.floor((self.remaining % (60 * 10)) / (60 * 10) * 8) + 2
+
+    if shouldFlash then
+        if flashIndicator then
+            lastBinProgress = lastBinProgress - 1
+            flashIndicator = false
+        else
+            flashIndicator = true
+        end
+    end
+
+    return string.rep(indicator_b[9], fullBins) .. indicator_b[lastBinProgress]
+end
+
+function wave:updateOnMenu()
+    local progress = wave:getProgressIndicator(true)
+    menuApp:setTitle(progress .. "   " .. self.task)
+end
+
 wave:reset()
 
 --- Interaction ---
 
-local progressAlert
 hs.hotkey.bind(
     {"ctrl"},
     "return",
     function()
-        if wave.isRunning and not progressAlert then
-            progressAlert = hs.alert.show(getProgressIndicator(wave.remaining) .. "   " .. wave.task, 30)
+        if wave.isRunning then
+            status:show(wave)
         end
     end,
     function()
-        if progressAlert then
-            hs.alert.closeSpecific(progressAlert)
-            progressAlert = nil
+        if wave.isRunning then
+            status:hide()
         else
             wave:start(wave.defaultDuration)
         end
