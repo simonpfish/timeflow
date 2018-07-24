@@ -55,9 +55,15 @@ function status:show(wave)
     self.text:show()
 end
 
-function status:chooseDuration(wave)
+function status:chooseDuration(wave) -- TODO add callback
     local timeStr = ""
     local listener
+
+    wave.remaining = wave.defaultDuration - 1 -- TODO: fix this, not a nice access
+    self:setText(wave:getProgressIndicator() .. " " .. wave.task .. " 🌊")
+    self.background:show()
+    self.text:show()
+
     listener =
         hs.eventtap.new(
         {hs.eventtap.event.types.keyDown},
@@ -75,7 +81,8 @@ function status:chooseDuration(wave)
                 self:hide()
                 listener:stop()
             elseif event:getKeyCode() == hs.keycodes.map["delete"] then
-                self:setText(wave.task .. " 🌊")
+                wave.remaining = wave.defaultDuration - 1 -- TODO: fix this, not a nice access
+                self:setText(wave:getProgressIndicator() .. " " .. wave.task .. " 🌊")
                 self.background:show()
                 self.text:show()
                 timeStr = ""

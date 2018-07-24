@@ -26,7 +26,6 @@ end
 
 function wave:start()
     self.task = things.getNextTask()
-    status:show(self)
     status:chooseDuration(self)
 end
 
